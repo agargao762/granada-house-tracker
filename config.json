@@ -1,0 +1,13 @@
+{
+  "searches": [
+    {
+      "name": "Granada Capital",
+      "city": "Granada",
+      "max_price": 350000,
+      "min_size": 85,
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "pool": true
+    }
+  ]
+}
