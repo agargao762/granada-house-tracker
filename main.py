@@ -1,7 +1,9 @@
 from config import load_config
-from database.database import create_database, get_session
+from database.database import create_database
 from models.house import House
 from scrapers.fake_scraper import FakeScraper
+from services.house_service import HouseService
+
 
 def main():
     print("=" * 50)
@@ -10,6 +12,9 @@ def main():
 
     # Crear la base de datos si no existe
     create_database()
+
+    # Crear el servicio de acceso a la base de datos
+    service = HouseService()
 
     # Leer la configuración
     config = load_config()
@@ -26,10 +31,10 @@ def main():
         print(f"Piscina     : {search['pool']}")
         print("-" * 40)
 
-    # Abrimos la base de datos
-    session = get_session()
+    # --------------------------------------------------
+    # Vivienda de prueba (la eliminaremos más adelante)
+    # --------------------------------------------------
 
-    # Creamos una vivienda de prueba
     house = House(
         portal="Prueba",
         title="Piso de prueba",
@@ -41,19 +46,18 @@ def main():
         url="https://ejemplo.com/piso-prueba"
     )
 
-    # Comprobamos si ya existe una vivienda con esa URL
-    existing_house = session.query(House).filter_by(url=house.url).first()
-
-    if existing_house:
-        print("\nℹ️ La vivienda ya existe en la base de datos.")
+    if service.save_house(house):
+        print("\n✅ Vivienda de prueba guardada.")
     else:
-        session.add(house)
-        session.commit()
-        print("\n✅ Vivienda de prueba guardada en la base de datos.")
+        print("\nℹ️ La vivienda de prueba ya existía.")
 
-        print("\nViviendas guardadas:\n")
+    # --------------------------------------------------
+    # Mostrar viviendas guardadas
+    # --------------------------------------------------
 
-    houses = session.query(House).all()
+    print("\nViviendas guardadas:\n")
+
+    houses = service.get_all()
 
     for house in houses:
         print("-" * 40)
@@ -65,20 +69,31 @@ def main():
         print(f"Baños       : {house.bathrooms}")
         print(f"Piscina     : {'Sí' if house.has_pool else 'No'}")
 
-        print("\nConsultando Fake Portal...\n")
+    # --------------------------------------------------
+    # Consultar el Fake Portal
+    # --------------------------------------------------
+
+    print("\nConsultando Fake Portal...\n")
 
     scraper = FakeScraper()
 
     results = scraper.search()
 
-    print(f"Se han encontrado {len(results)} viviendas.\n")
+    print(f"Se han encontrado {len(results)} viviendas.")
 
-    for house in results:
-        print("-" * 40)
-        print(f"Portal      : {house.portal}")
-        print(f"Título      : {house.title}")
-        print(f"Precio      : {house.price} €")
-        print(f"Superficie  : {house.size} m²")
+    new_houses = service.save_houses(results)
+
+    print(f"Nuevas viviendas guardadas: {len(new_houses)}\n")
+
+    if len(new_houses) == 0:
+        print("No hay viviendas nuevas.")
+    else:
+        for house in new_houses:
+            print("-" * 40)
+            print(f"Portal      : {house.portal}")
+            print(f"Título      : {house.title}")
+            print(f"Precio      : {house.price} €")
+            print(f"Superficie  : {house.size} m²")
 
 
 if __name__ == "__main__":
