@@ -1,7 +1,7 @@
 from config import load_config
 from database.database import create_database
 from models.house import House
-from scrapers.fake_scraper import FakeScraper
+from services.scraper_manager import ScraperManager
 from services.house_service import HouseService
 
 
@@ -73,11 +73,11 @@ def main():
     # Consultar el Fake Portal
     # --------------------------------------------------
 
-    print("\nConsultando Fake Portal...\n")
+    print("\nConsultando portales...\n")
 
-    scraper = FakeScraper()
+    manager = ScraperManager()
 
-    results = scraper.search()
+    results = manager.search_all()
 
     print(f"Se han encontrado {len(results)} viviendas.")
 
