@@ -1,23 +1,26 @@
-from config import load_config
+import os
+
+from telegram import Bot
 
 
 class TelegramService:
 
     def __init__(self):
-
-        config = load_config()
-
-        self.token = config.get("telegram", {}).get("token")
-        self.chat_id = config.get("telegram", {}).get("chat_id")
+        self.token = os.getenv("TELEGRAM_TOKEN")
+        self.chat_id = os.getenv("TELEGRAM_CHAT_ID")
 
     def enabled(self):
-
         return bool(self.token and self.chat_id)
 
-    def send(self, message):
+    async def send(self, message):
 
         if not self.enabled():
             print("Telegram no configurado.")
             return
 
-        print("Enviando mensaje a Telegram...")
+        bot = Bot(token=self.token)
+
+        await bot.send_message(
+            chat_id=self.chat_id,
+            text=message
+        )
