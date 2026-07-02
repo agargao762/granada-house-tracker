@@ -3,6 +3,8 @@ from database.database import create_database
 from models.house import House
 from services.scraper_manager import ScraperManager
 from services.house_service import HouseService
+from services.filter_service import FilterService
+from services.telegram_service import TelegramService
 
 
 def main():
@@ -15,6 +17,8 @@ def main():
 
     # Crear el servicio de acceso a la base de datos
     service = HouseService()
+    telegram = TelegramService()
+    filter_service = FilterService()
 
     # Leer la configuración
     config = load_config()
@@ -52,22 +56,12 @@ def main():
         print("\nℹ️ La vivienda de prueba ya existía.")
 
     # --------------------------------------------------
-    # Mostrar viviendas guardadas
+    # Resumen de la base de datos
     # --------------------------------------------------
-
-    print("\nViviendas guardadas:\n")
 
     houses = service.get_all()
 
-    for house in houses:
-        print("-" * 40)
-        print(f"Portal      : {house.portal}")
-        print(f"Título      : {house.title}")
-        print(f"Precio      : {house.price} €")
-        print(f"Superficie  : {house.size} m²")
-        print(f"Dormitorios : {house.bedrooms}")
-        print(f"Baños       : {house.bathrooms}")
-        print(f"Piscina     : {'Sí' if house.has_pool else 'No'}")
+    print(f"\nBase de datos: {len(houses)} viviendas")
 
     # --------------------------------------------------
     # Consultar el Fake Portal
@@ -79,21 +73,40 @@ def main():
 
     results = manager.search_all()
 
-    print(f"Se han encontrado {len(results)} viviendas.")
+    print(f"📥 Anuncios encontrados: {len(results)}")
 
-    new_houses = service.save_houses(results)
+    filtered = []
 
-    print(f"Nuevas viviendas guardadas: {len(new_houses)}\n")
+    search = config["searches"][0]
+
+    for house in results:
+
+        if filter_service.matches(house, search):
+            filtered.append(house)
+
+    print(f"🎯 Cumplen filtros: {len(filtered)}")
+
+    new_houses = service.save_houses(filtered)
+
+    print(f"🆕 Nuevas viviendas: {len(new_houses)}")
 
     if len(new_houses) == 0:
         print("No hay viviendas nuevas.")
     else:
-        for house in new_houses:
-            print("-" * 40)
-            print(f"Portal      : {house.portal}")
-            print(f"Título      : {house.title}")
-            print(f"Precio      : {house.price} €")
-            print(f"Superficie  : {house.size} m²")
+        print("\nNuevas viviendas:\n")
+
+    for house in new_houses:
+        print("-" * 40)
+        print(f"Portal : {house.portal}")
+        print(f"Título : {house.title}")
+        print(f"Precio : {house.price:.0f} €")
+        print(f"m²     : {house.size:.0f}")
+        print(f"URL    : {house.url}")
+
+    if telegram.enabled():
+        telegram.send("House Tracker ejecutado correctamente.")
+    else:
+        print("Telegram deshabilitado.")
 
 
 if __name__ == "__main__":

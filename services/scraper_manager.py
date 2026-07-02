@@ -1,12 +1,11 @@
-from scrapers.idealista_scraper import IdealistaScraper
-
+from scrapers.pisos_scraper import PisosScraper
 
 class ScraperManager:
 
     def __init__(self):
 
         self.scrapers = [
-            IdealistaScraper()
+            PisosScraper()
         ]
 
     def search_all(self):
