@@ -13,6 +13,16 @@ class TelegramService:
 
     def enabled(self):
         return bool(self.token and self.chat_id)
+    
+    def format_house(self, house):
+
+        return (
+            f"🏠 {house.title}\n"
+            f"💰 {house.price:.0f} €\n"
+            f"📐 {house.size:.0f} m²\n"
+            f"🛏 {house.bedrooms} hab | 🚿 {house.bathrooms} baños\n"
+            f"🔗 {house.url}"
+        )
 
     async def send(self, message):
 
@@ -34,32 +44,44 @@ class TelegramService:
 
         message = (
             f"{APP_ICON} {APP_NAME}\n\n"
-            f"🏠 {house.title}\n"
-            f"💰 {house.price:.0f} €\n"
-            f"📐 {house.size:.0f} m²\n"
-            f"🔗 {house.url}"
+            f"{self.format_house(house)}"
         )
 
         await self.send(message)
 
-    async def send_houses(self, search, houses):
+    async def send_houses(self, search, new_houses, updated_houses):
 
-        if not houses:
+        if not new_houses and not updated_houses:
             return
 
-        message = (
-            f"{APP_ICON} {APP_NAME}\n\n"
-            f"📍 Búsqueda: {search['name']}\n"
-            f"🆕 Viviendas nuevas: {len(houses)}\n\n"
-        )
+        lines = [
+            f"{APP_ICON} {APP_NAME}",
+            "",
+            f"📍 {search['name']}",
+            "",
+            f"🆕 Viviendas nuevas: {len(new_houses)}",
+            "",
+        ]
 
-        for house in houses:
+        for house in new_houses:
 
-            message += (
-                f"• {house.title}\n"
-                f"💰 {house.price:.0f} €\n"
-                f"📐 {house.size:.0f} m²\n"
-                f"🔗 {house.url}\n\n"
-            )
+            lines.append(self.format_house(house))
+            lines.append("")
+            lines.append("━━━━━━━━━━━━━━━━━━")
+            lines.append("")
 
-        await self.send(message)
+        if updated_houses:
+
+            lines.append("💰 Cambios de precio")
+            lines.append("")
+
+            for house, old_price in updated_houses:
+
+                lines.append(f"🏠 {house.title}")
+                lines.append(f"⬇️ {old_price:.0f} € → {house.price:.0f} €")
+                lines.append(f"🔗 {house.url}")
+                lines.append("")
+                lines.append("━━━━━━━━━━━━━━━━━━")
+                lines.append("")
+
+        await self.send("\n".join(lines))

@@ -83,8 +83,7 @@ class PisosScraper(BaseScraper):
                 .strip()
             )
 
-         
-
+            
             house = House(
                 portal="Pisos.com",
                 title=title_text,

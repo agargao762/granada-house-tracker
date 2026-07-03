@@ -35,6 +35,30 @@ class HouseTracker:
         print(f"Baños       : {search['bathrooms']}")
         print(f"Piscina     : {search['pool']}")
 
+    def print_new_houses(self, houses):
+
+        print("\nNuevas viviendas:\n")
+
+        for house in houses:
+
+            print("-" * 40)
+            print(f"Portal : {house.portal}")
+            print(f"Título : {house.title}")
+            print(f"Precio : {house.price:.0f} €")
+            print(f"m²     : {house.size:.0f}")
+            print(f"URL    : {house.url}")
+
+    def print_price_changes(self, updated_houses):
+
+        print("\nCambios de precio:\n")
+
+        for house, old_price in updated_houses:
+
+            print("-" * 40)
+            print(f"Título : {house.title}")
+            print(f"Antes  : {old_price:.0f} €")
+            print(f"Ahora  : {house.price:.0f} €")
+
     def process_search(self, search):
 
         self.print_search(search)
@@ -66,34 +90,19 @@ class HouseTracker:
             print("No hay novedades.")
             return
 
-        print("\nNuevas viviendas:\n")
-
-        for house in new_houses:
-
-            print("-" * 40)
-            print(f"Portal : {house.portal}")
-            print(f"Título : {house.title}")
-            print(f"Precio : {house.price:.0f} €")
-            print(f"m²     : {house.size:.0f}")
-            print(f"URL    : {house.url}")
+        if new_houses:
+            self.print_new_houses(new_houses)
 
         if updated_houses:
-
-            print("\nCambios de precio:\n")
-
-            for _, house, old_price in updated_houses:
-
-                print("-" * 40)
-                print(f"Título : {house.title}")
-                print(f"Antes  : {old_price:.0f} €")
-                print(f"Ahora  : {house.price:.0f} €")
+            self.print_price_changes(updated_houses)
 
         if self.telegram.enabled():
 
             asyncio.run(
                 self.telegram.send_houses(
                     search,
-                    new_houses
+                    new_houses,
+                    updated_houses
                 )
             )
 

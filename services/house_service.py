@@ -44,7 +44,6 @@ class HouseService:
             self.update_price(existing, house.price)
 
             return (
-                "price_changed",
                 existing,
                 old_price
             )
