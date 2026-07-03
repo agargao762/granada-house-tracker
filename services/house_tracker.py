@@ -8,6 +8,7 @@ from services.filter_service import FilterService
 from services.scraper_manager import ScraperManager
 from services.telegram_service import TelegramService
 from app_config import APP_NAME, APP_ICON
+from services.excel_exporter import ExcelExporter
 
 
 class HouseTracker:
@@ -15,13 +16,10 @@ class HouseTracker:
     def __init__(self):
 
         self.config = load_config()
-
+        self.exporter = ExcelExporter()
         self.service = HouseService()
-
         self.filter_service = FilterService()
-
         self.manager = ScraperManager()
-
         self.telegram = TelegramService()
 
     def print_search(self, search):
@@ -116,3 +114,9 @@ class HouseTracker:
         for search in self.config["searches"]:
             
             self.process_search(search)
+        
+        houses = self.service.get_all()
+
+        self.exporter.export(houses)
+
+        print(f"\n📄 Excel exportado: exports/viviendas.xlsx")
