@@ -56,12 +56,16 @@ class HouseTracker:
 
         print(f"🎯 Cumplen filtros: {len(filtered)}")
 
-        new_houses = self.service.save_houses(filtered)
-
+        new_houses, updated_houses = self.service.save_houses(filtered)
+        
         print(f"🆕 Nuevas viviendas: {len(new_houses)}")
 
-        if not new_houses:
-            print("No hay viviendas nuevas.")
+        print(f"💰 Cambios de precio: {len(updated_houses)}")
+
+
+
+        if not new_houses and not updated_houses:
+            print("No hay novedades.")
             return
 
         print("\nNuevas viviendas:\n")
@@ -74,6 +78,17 @@ class HouseTracker:
             print(f"Precio : {house.price:.0f} €")
             print(f"m²     : {house.size:.0f}")
             print(f"URL    : {house.url}")
+
+        if updated_houses:
+
+            print("\nCambios de precio:\n")
+
+            for _, house, old_price in updated_houses:
+
+                print("-" * 40)
+                print(f"Título : {house.title}")
+                print(f"Antes  : {old_price:.0f} €")
+                print(f"Ahora  : {house.price:.0f} €")
 
         if self.telegram.enabled():
 

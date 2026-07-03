@@ -74,15 +74,21 @@ class PisosScraper(BaseScraper):
 
             href = title.get("href", "")
 
+            title_text = title.get_text(strip=True)
+
+            price_value = float(
+                price.get_text(strip=True)
+                .replace(".", "")
+                .replace("€", "")
+                .strip()
+            )
+
+         
+
             house = House(
                 portal="Pisos.com",
-                title=title.get_text(strip=True),
-                price=float(
-                    price.get_text(strip=True)
-                    .replace(".", "")
-                    .replace("€", "")
-                    .strip()
-                ),
+                title=title_text,
+                price=price_value,
                 size=size,
                 bedrooms=bedrooms,
                 bathrooms=bathrooms,

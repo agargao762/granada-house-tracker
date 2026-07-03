@@ -1,5 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean
 from sqlalchemy.orm import declarative_base
+from datetime import datetime, UTC
+from sqlalchemy import DateTime
 
 Base = declarative_base()
 
@@ -15,6 +17,9 @@ class House(Base):
     bathrooms = Column(Integer)
     has_pool = Column(Boolean)
     url = Column(String, unique=True)
+    first_seen = Column(
+    DateTime,
+    default=lambda: datetime.now(UTC))
 
     def __repr__(self):
         return (
