@@ -8,6 +8,15 @@
       "bedrooms": 3,
       "bathrooms": 2,
       "pool": false
+    },
+    {
+      "name": "Armilla",
+      "city": "Armilla",
+      "max_price": 300000,
+      "min_size": 90,
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "pool": false
     }
   ]
 }

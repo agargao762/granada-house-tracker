@@ -8,17 +8,12 @@ class ScraperManager:
             PisosScraper()
         ]
 
-    def search_all(self):
+    def search_all(self, search):
 
         houses = []
 
         for scraper in self.scrapers:
 
-            try:
-                results = scraper.search()
-                houses.extend(results)
-
-            except Exception as e:
-                print(f"⚠️ Error en {scraper.__class__.__name__}: {e}")
+            houses.extend(scraper.search(search))
 
         return houses

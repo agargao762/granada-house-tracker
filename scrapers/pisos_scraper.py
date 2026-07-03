@@ -1,3 +1,5 @@
+from re import search
+
 from bs4 import BeautifulSoup
 
 from models.house import House
@@ -10,11 +12,18 @@ class PisosScraper(BaseScraper):
     def __init__(self):
         self.http = HttpScraper()
 
-    def search(self):
+    def build_url(self, search):
+
+        city = search["city"].lower().replace(" ", "-")
+
+        return f"https://www.pisos.com/venta/pisos-{city}/"
+
+    def search(self, search):
 
         print("Consultando Pisos.com...")
 
-        url = "https://www.pisos.com/venta/pisos-granada/"
+        url = self.build_url(search)
+        print(f"URL: {url}")                        #Temporal
 
         html = self.http.get(url)
 

@@ -1,11 +1,13 @@
 import asyncio
 
+
 from config import load_config
 
 from services.house_service import HouseService
 from services.filter_service import FilterService
 from services.scraper_manager import ScraperManager
 from services.telegram_service import TelegramService
+from app_config import APP_NAME, APP_ICON
 
 
 class HouseTracker:
@@ -22,17 +24,12 @@ class HouseTracker:
 
         self.telegram = TelegramService()
 
-    def run(self):
-
+    def print_search(self, search):
+            
         print("=" * 50)
-        print("HOUSE TRACKER")
+        print(f"{APP_ICON} {APP_NAME}")
         print("=" * 50)
 
-        search = self.config["searches"][0]
-
-        print("\nBúsquedas configuradas:\n")
-
-        print(f"Nombre      : {search['name']}")
         print(f"Ciudad      : {search['city']}")
         print(f"Precio máx. : {search['max_price']} €")
         print(f"Superficie  : {search['min_size']} m²")
@@ -40,16 +37,14 @@ class HouseTracker:
         print(f"Baños       : {search['bathrooms']}")
         print(f"Piscina     : {search['pool']}")
 
-        print("-" * 40)
+    def process_search(self, search):
 
-        houses = self.service.get_all()
-
-        print(f"\nBase de datos: {len(houses)} viviendas")
+        self.print_search(search)
 
         print("\nConsultando portales...\n")
 
-        results = self.manager.search_all()
-
+        results = self.manager.search_all(search)
+        
         print(f"📥 Anuncios encontrados: {len(results)}")
 
         filtered = []
@@ -65,10 +60,8 @@ class HouseTracker:
 
         print(f"🆕 Nuevas viviendas: {len(new_houses)}")
 
-        if len(new_houses) == 0:
+        if not new_houses:
             print("No hay viviendas nuevas.")
-            
-        
             return
 
         print("\nNuevas viviendas:\n")
@@ -84,11 +77,27 @@ class HouseTracker:
 
         if self.telegram.enabled():
 
-            for house in filtered[:1]:
-                asyncio.run(
-                    self.telegram.send_house(house)
+            asyncio.run(
+                self.telegram.send_houses(
+                    search,
+                    new_houses
                 )
+            )
 
         else:
-
             print("Telegram deshabilitado.")
+
+
+    def run(self):
+
+        print("=" * 50)
+        print(f"{APP_ICON} {APP_NAME}")
+        print("=" * 50)
+
+        houses = self.service.get_all()
+
+        print(f"\nBase de datos: {len(houses)} viviendas")
+
+        for search in self.config["searches"]:
+            
+            self.process_search(search)
